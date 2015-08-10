@@ -1,0 +1,1006 @@
+extends ../refashion/layout
+block append styles
+	link(rel="stylesheet", href="//s.baixing.net/d/refashion-home/index.css")
+	link(rel="stylesheet", href="http://s.baixing.net/css/module/jquery-ui-1.9.1.custom.css")
+block append scripts
+	script(src="http://s.baixing.net/js/global/jquery-1.11.1.min.js")
+block header
+	- $city = $data->city
+	- $smallarealist = Config::get('livesmallarealist')
+	- $host = Area::domainArea(HttpRequest::host())
+
+	//- topbar 目前作为一个全局通用的模块，需要在 header 中引入
+	//- 但有时候你可能不需要，所以把它定义成一个块，以便你可以重写它
+	header
+		div
+			block topbar
+				include ../refashion/topbar-helper
+				.toolbar
+					i.icon-mobile
+					a(href="//www.baixing.com/m/") 手机版
+					a(rel="dialog", href="#promote-weixin-modal", data-toggle="modal") 微信版
+					a(href="//www.baixing.com/a/mobile") APP
+					i.sep |
+					+topbar-near-by-city($data)
+
+					ul#user-tools.navbar-nav
+						+topbar-user-info()
+						+topbar-notification()
+						+topbar-vip-entrance()
+						+topbar-promotion()
+						+topbar-third-party()
+						li: a(href="http://www.baixing.com/help/", target="_blank") 帮助
+		div
+			div(style="max-width: 1200px; margin: auto; position: relative")
+				a(href="/", property="v:title", rel="v:url", style="position: absolute; left: 5px; top: 20px;")
+					img(class="baixingwang-logo",alt="百姓网",src="http://s.baixing.net/img/bangui/logo.png",width="30%", style="display: none")
+					img(class="baixingwang-logo",alt="百姓网",src="http://s.baixing.net/img/bangui/white-logo.png",width="30%")
+				div#jumpbutton(style="position: absolute; right: 5px; top: 20px; font-size: 1.3em; font-weight: 600;")
+					ul
+						li(style="float: left; margin: 1.6em")
+							a(href="#principle", id="jumptobase", data-toggle="tab") 基本原则
+						li(style="float: left; margin: 1.6em")
+							a(href="#detail", id="jumptodetail", data-toggle="tab") 执行细则
+						li(style="float: left; margin: 1.6em")
+							a(href="#rule", id="jumptorule", data-toggle="tab") 版规
+
+block content
+	style.
+		/*from origin chu refashioned
+		*/
+		.bangui-title {margin-bottom:10px}
+		#principle li, #detail li{padding:6px 0;line-height:1.8;border-bottom:1px solid #f2f1ec;}
+		.bangui li b.small{color:#555}
+		#principle .chosen, #detail .chosen{background:#F1944B;margin:0 -10px;padding:6px 10px;}
+		.bangui .chosen, .bangui .chosen div{color:#fff;}
+		.chosen a{color:#963;}
+		#principle a,#detail a{text-decoration: underline;color:#999;padding:0 6px;}
+		.bangui li div{color:#999;font-size:12px;}
+		.nav{height:40px;background: #fcfcfc;width: 100%;left: 0;z-index: 998;box-shadow: 0 3px 3px #b4b2b2;
+			-webkit-box-shadow: 0 3px 3px #b4b2b2;-moz-box-shadow: 0 3px 3px #b4b2b2;-ms-box-shadow: 0 3px 3px #b4b2b2;
+			_position:absolute;}
+		.tab-content{z-index: inherit !important;}
+		.nav ul{width: 980px;margin: 0 auto;  overflow: hidden;position: relative;z-index: 5}
+		.nav ul li{float: left;height: 40px;line-height: 40px;padding: 0 24px;border-right: 1px solid #ccc}
+		.nav ul li:last-child{border:none}
+		.icon-cat-ershou:before {  content: "\E00E";}
+		.icon-cat-gongzuo:before{content:"\E016"}
+		.icon-cat-fang:before{content:"\E012"}
+		.icon-cat-cheliang:before{content:"\E011"}
+		.icon-cat-huodong:before{content:"\E021"}
+		.icon-cat-jiaoyupeixun:before{content:"\E015"}
+		.icon-cat-chongwuleimu:before{content:"\E010"}
+		.icon-cat-jianzhi:before{content:'\E019'}
+		.sub-nav span{padding: 0;font-size: 16px;color:#333;line-height: 32px}
+		.nav ul li span{padding-left: 6px}
+		.current{color:#ef7728 !important;}
+		.sub-nav{
+		}
+		.sub-nav i{background: #ec5524;color: #fff;display:block;height: 32px;width: 32px;position: relative;float: left;
+			text-align: center;line-height: 32px!important;margin-right: 10px}
+		#ershou i{background: #ae7ac4}
+		#jiachi i{background: #5299c7}
+		#chongwuleimu i {background: #6fd375}
+		#fuwu i{background: #ae7ac4}
+		#jiaoyupeixun i{background: #8facd8}
+		#huodong i{background: #ff7b32}
+		#cheliang i{background: #eb974e}
+		#fang i {background: #58d78d}
+		#gongzuo i{background: #3598dc}
+		h3{line-height: 3}
+		/*.rule-content{margin-top:72px}*/
+		#rule{overflow: hidden;
+			padding-bottom: 140px;}
+		.nav a{color:#333}
+		.rule-detail{
+			background-color: #FFF;
+			width: 1200px;
+			margin: 0 auto;
+			margin-top: 30px;
+			margin-bottom: 100px;
+		}
+		.rule-content{color:#999;font-size: 12px}
+		.rule-detail a{color:#999; padding: 0 6px;text-decoration: underline;}
+
+		/*from zhongyao chu
+		*/
+		.base-top-back {
+			height: 800px;
+			width: 100%;
+			background-image: url("http://s.baixing.net/img/bangui/pic1W.png");
+			z-index: -1;
+			position: fixed;
+			top: 0;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
+		.base-top{
+			/*background-image: url("http://s.baixing.net/img/bangui/pic1W.png");*/
+			height: 800px;
+			background-position: center;
+		}
+		.base-middle-item-area{
+			position: relative;
+			height: 101px;
+			margin-left: auto;
+			width: 100%;
+			margin-right: auto;
+		}
+		.base-bottom{
+			background-color:#EBF0ED;
+		}
+
+		.base-middle{
+			background-color: #EBF0ED;
+		}
+		.base-middle-p1{
+			width: 100%;
+			text-align: center;
+			height: 450px;
+		}
+		.base-middle-text1{
+			width:100%;
+		}
+		.base-top-img-area{
+			width:100%;
+			text-align:center;
+		}
+		.base-top-img-area > img{
+			width: 100%;
+
+		}
+		.base-top-mask{
+			position: relative;
+			top: 200px;
+			right: -363px;
+			width: 400px;
+			height: 230px;
+			background-color: rgba(0, 0, 0, 0.48);
+			margin: 0 auto;
+		}
+
+		.base-top-mask > .tittle {
+			position: relative;
+			left: 10%;
+			width: 80%;
+			padding: 10px 10px 10px 0;
+			color: white;
+			font-size: 34px;
+			text-rendering: geometricPrecision;
+			border-bottom-style: solid;
+			border-bottom-width: 1px;
+			border-bottom-color: rgba(255, 255, 255, 1);
+		}
+
+		.base-top-mask > .desc {
+			position: relative;
+			left: 10%;
+			width: 80%;
+			margin-top: 10px;
+			padding: 10px 10px 10px 0px;
+			color: #FFF;
+			font-size: 16px;
+			text-rendering: geometricprecision;
+			line-height: 1.7;
+			font-weight:bold;
+		}
+
+
+		.base-middle-text1 > p{
+			text-align: center;
+			text-rendering: geometricPrecision;
+			font-size: 25px;
+			color: #4f4d4d;
+			padding: 65px;
+			font-weight:bold;
+		}
+
+		.base-middle-img-area{
+			background-image: url("http://s.baixing.net/img/bangui/pic2W.png");
+			background-position: center;
+			height: 800px;
+			position: relative;
+			width: 100%;
+			text-align: center;
+			margin-top: 250px;
+			padding-left: 100px;
+			padding-right: 100px;
+		}
+
+		.tittlew{
+			color:#FFF;
+			font-size:25px;
+		}
+
+		.descw{
+			color: #FFF;
+			padding: 15px;
+			font-size:16px;
+			text-align: left;
+		}
+
+		.base-middle-img-area > img{
+			width: 100%;
+		}
+
+		.base-middle-item3{
+			position: relative;
+			width: 100%;
+			max-width: 1320px;
+			min-height: 440px;
+			height: auto;
+			margin: 0 auto;
+		}
+
+		.base-middle-respect{
+			left: 143px;
+		}
+
+		.base-middle-honest{
+			left: 486px;
+			top: -362px;
+		}
+
+		.base-middle-humanity{
+			left: 829px;
+			top: -712px;
+		}
+
+		.item{
+			position: relative;
+			width: 200px;
+			min-height: 300px;
+			margin: 50px;
+			text-align: center;
+
+		}
+		.item > img{
+			width: 86px;
+		}
+
+		.base-middle-text2{
+			position: relative;
+			width: 100%;
+			top: 40px;
+			color: #FFF;
+		}
+
+		.base-middle-text2 > p{
+			text-align: center;
+			padding: 20px;
+			margin: 0 auto;
+			font-size: 25px;
+			max-width: 1000px;
+			font-weight:bold;
+		}
+
+		.base-bottom-img-area{
+			padding-top: 100px;
+			text-align: center;
+		}
+
+		.base-bottom-text1{
+			padding-top: 50px;
+		}
+
+		.base-bottom-text1 > p{
+			text-align: center;
+			font-size: 25px;
+			margin-left: 430px;
+			margin-right: 430px;
+			padding-top: 50px;
+		}
+
+		.base-bottom-text2{
+			padding-top: 50px;
+		}
+
+		.base-bottom-text2 > p{
+			text-align: center;
+			padding: 20px;
+			font-size: larger;
+			max-width: 860px;
+			margin: 0 auto;
+		}
+
+		.base-middle-item7{
+			text-align: center;
+			width: 1100px;
+			height: 800px;
+			max-width: 1320px;
+			margin: 0 auto;
+			overflow: hidden;
+		}
+
+		.base-middle-photo{
+		}
+
+		.base-middle-real{
+			bottom: 350px;
+			left: 250px;
+		}
+
+		.base-middle-local{
+			bottom: 700px;
+			left: 500px;
+		}
+
+		.base-middle-legal{
+			bottom: 1050px;
+			left: 750px;
+		}
+
+		.base-middle-personal{
+			bottom: 1100px;
+		}
+
+		.base-middle-unique{
+			bottom: 1465.08px;
+			left: 250px;
+		}
+
+		.base-middle-classify{
+			bottom: 1815.08px;
+			left: 500px;
+		}
+
+		.item > .tittle{
+			font-size: 23px;
+			padding: 10px;
+			font-weight: bold;
+		}
+
+		.item > .desc{
+			padding: 10px;
+			font-size: 16px;
+			text-align: left;
+		}
+
+
+		/*fregmentor
+		*/
+
+		.rule-content{
+			position: relative;
+			top: 0;
+		}
+		.detail-box{
+			height: auto;
+			padding:70px;
+		}
+
+		.detail-tittle{
+			position: relative;
+			top: 40px;
+			float: right;
+			height: 32px;
+		}
+
+		.detail-tittle > p{
+			text-align: center;
+			font-size: 28px;
+			color: rgb(250,41,83);
+		}
+
+		.detail-desc{
+			width: 60%;
+			max-width: 800px;
+			line-height: 2;
+		}
+
+		body > footer{
+			margin-top: 0 !important;
+			text-align: center;
+		}
+		.detail-desc > h3{
+			font-size:17px;
+			color:#000;
+			line-height: 0 !important;
+			padding-top: 30px !important;
+		}
+
+		.detail-desc > h3:before{
+			content: "·";
+			color: rgb(250,41,83);
+			font-size: 25px;
+		}
+
+
+		/*mine*/
+		body {
+			background-color: #ebf0ed;
+			font-family: 'Hiragino Sans GB', Arial, SimSun, 'WenQuanYi Micro Hei', sans-serif;
+			letter-spacing: 0.2em;
+			font-size: 100%;
+		}
+
+		a,body {
+			color: #565a5c;
+		}
+
+		a:hover {
+			text-decoration: none !important;
+			cursor: pointer !important;
+		}
+		a.active {
+			color: #fb4769 !important;
+		}
+
+		#detail p:hover,
+		#detail h2:hover {
+			cursor: default;
+		}
+
+		#detail .cell-head {
+			height: 90px;
+			padding: 14px 0 0;
+		}
+
+		#detail .inner-container:nth-child(3) .cell:last-child .cell-head {
+			padding: 0;
+		}
+
+		#detail h2 {
+			font-size: 30px;
+			margin: 0;
+		}
+
+		#detail .outer-container {
+			min-width: 1024px;
+		}
+		#detail .outer-container:first-child {
+			height: 736px;
+			width: 100%;
+			background-image: url(http://s.baixing.net/img/bangui/details-banner1.jpg);
+			background-position: center;
+			color: #848484;
+			z-index: -1;
+			position: fixed;
+			top: 0;
+		}
+		#detail .outer-container:nth-child(2) {
+			margin-top: 680px;
+			background-color: #ebf0ed;
+		}
+
+		#detail .outer-container:first-child div:first-child {
+			width: 800px;
+			margin: auto;
+			padding: 180px 0;
+		}
+
+		#detail .outer-container:first-child p span,
+		#detail .outer-container:first-child p:first-child {
+			color: #fb4769;
+			font-weight: 600;
+		}
+
+		#detail .outer-container:first-child p {
+			font-size: 34px;
+			width: 12em;
+			text-align: center;
+			margin: auto;
+		}
+
+		#detail-button {
+			width: 115px;
+			height: 115px;
+			background-position: -8px -110px;
+			position: absolute;
+			left: 50%;
+			margin-left: -57px;
+			top: 690px;
+		}
+
+		#detail .inner-container {
+			width: 1000px;
+			margin: auto;
+			border-bottom: solid 1px #aaa;
+		}
+
+		#detail .inner-container {
+			padding-top: 70px;
+			height: 610px;
+		}
+
+		#detail .icon,
+		#detail-button {
+			background-image: url(http://s.baixing.net/img/bangui/details-logo.png);
+		}
+		#detail .icon {
+			width: 100%;
+			height: 225px;
+		}
+
+		#detail .inner-container:nth-child(1) .icon {
+			background-position: 3px -250px;
+		}
+
+		#detail .inner-container:nth-child(2) .icon {
+			background-position: 3px -498px;
+		}
+
+		#detail .inner-container:nth-child(3) .icon {
+			background-position: 3px -737px;
+		}
+
+		#detail .inner-container:nth-child(4) .icon {
+			background-position: 3px -990px;
+		}
+
+		#detail .inner-container:nth-child(5) .icon {
+			background-position: -260px -6px;
+		}
+		#detail .cell {
+			width: 218px;
+			margin: 20px 21px 0;
+			float: left;
+			text-align: center;
+		}
+
+		#detail .cell:nth-child(2) {
+			margin-left: 0;
+		}
+
+		#detail .cell:last-child {
+			margin-right: 0;
+		}
+
+		#detail .cell p {
+			text-align: left;
+			font-size: 16px;
+		}
+
+		#detail .inner-container:last-child .icon {
+			width: 212px;
+			margin: auto;
+		}
+		#detail .inner-container:last-child .cell {
+			float: none;
+			margin: auto;
+		}
+		#rule > div:first-child {
+			position: static;
+			width: 100%;
+		}
+		#rule nav {
+			width: 100%;
+			margin: 125px 0 0;
+			height: 63px;
+			background-color: #fb4769;
+		}
+		#rule nav div {
+			width: 1200px;
+			margin: auto;
+		}
+		#rule nav a {
+			display: block;
+			width: 133px;
+			float: left;
+			color: white;
+			text-align: center;
+		}
+		#rule nav a:last-child {
+			width: 136px;
+		}
+		.rule-nav-a-hover {
+			background-color: white !important;
+			color: #fb4769 !important;
+		}
+
+		#rule nav span {
+			font-size: 18px;
+			display: block;
+			height: 63px;
+			line-height: 63px;
+		}
+
+		#rule .rule-lists .rule-lists-frame {
+			width: 1200px;
+			margin: auto;
+			background-color: white;
+			border-bottom: solid 2px #fb4769;
+		}
+
+		#rule .rule-list {
+			width: 1160px;
+			margin: auto;
+			background-color: white;
+			overflow: hidden;
+			padding: 0 0 30px;
+		}
+		#rule .clear-left-bar {
+			margin-left: -1px;
+		}
+		#rule .rule-list .clear-left-bar div {
+			float: left;
+			text-align: center;
+			margin: 22px 0 0;
+		}
+
+		#rule .rule-list a{
+			font-size: 18px;
+			margin: 0;
+			padding: 0 16px;
+			border-left: solid 1px grey;
+		}
+
+		.clearfix:before,
+		.clearfix:after {
+			content: " ";
+			display: table;
+		}
+		.clearfix:after {
+			clear: both;
+		}
+		.clearfix {
+			*zoom: 1;
+		}
+	div.tab-content
+		#principle.bangui-tab
+			div.base-top-back
+			div.base-top
+				div.base-top-mask
+					p.tittle
+						|连接你我身边需求
+					p.desc
+						|百姓网致力于连接你我身边的需求，通过建立一个可靠的 温暖的 有人情味的社区，让大家可以简单 快速 方便地和邻居买卖二手，找朋友，找工作，租房子等等
+			div.base-middle
+				div.base-middle-p1
+					div.base-middle-text1
+						p.
+							当你使用百姓网的时候,我们希望你能做到
+					div.base-middle-item-area
+						div.base-middle-item3
+							div.base-middle-respect.item
+								img(src="http://s.baixing.net/img/bangui/heart.png")
+								p.tittle
+									|尊重他人
+								p.desc
+									|请相信百姓网的用户都和你一样带着美好的愿望来到这里，请在发布信息，联系发布人，见面交易等时候表现出对他人的尊重
+							div.base-middle-honest.item
+								img(src="http://s.baixing.net/img/bangui/people.png")
+								p.tittle
+									|诚信
+								p.desc
+									|请确保你发布的信息是真实的，与邻居诚实地沟通和交易
+							div.base-middle-humanity.item
+								img(src="http://s.baixing.net/img/bangui/tea.png")
+								p.tittle
+									|人情味
+								p.desc
+									|请了解使用暴行网的人可能是和你一样的个人，请在发布信息的时候尽量用有趣的 有个人色彩的方式描述，在交易时理解对方是和你一样的个人
+				div.base-middle-p2
+					div.base-middle-img-area
+						div.base-middle-text2
+							p.
+								在你发布信息时,我们希望你做到
+						div.base-middle-item-area
+							div.base-middle-item7
+								div.base-middle-photo.item.line1
+									img(src="http://s.baixing.net/img/bangui/photo.png")
+									p.tittlew
+										| 照片
+									p.descw
+										| 请使用自己实拍的照片，而不是在网还是那个获取的照片，尤其不要使用淘宝等
+								div.base-middle-real.item.line1
+									img(src="http://s.baixing.net/img/bangui/real.png")
+									p.tittlew
+										| 真实
+									p.descw
+										| 请确保你的信息的描述是真实的 准确的
+								div.base-middle-local.item.line1
+									img(src="http://s.baixing.net/img/bangui/local.png")
+									p.tittlew
+										| 本地
+									p.descw
+										| 百姓网事连接身边需求的，请仅在一个地点发布你的信息
+								div.base-middle-legal.item.line1
+									img(src="http://s.baixing.net/img/bangui/legal.png")
+									p.tittlew
+										| 合法
+									p.descw
+										| 请不要发布违反国家政策法规的信息，这样的信息将被删除
+								div.base-middle-personal.item.line2
+									img(src="http://s.baixing.net/img/bangui/personal.png")
+									p.tittlew
+										| 个人
+									p.descw
+										| 百姓网事连接个人和个人身边需求的平台，我们允许商家发布信息，但请在有此选项的时候如实标出你的身份，我们会把你的信息放在合适的地方
+								div.base-middle-unique.item.line2
+									img(src="http://s.baixing.net/img/bangui/unique.png")
+									p.tittlew
+										| 重复
+									p.descw
+										| 请不要发布重复信息
+								div.base-middle-classify.item.line2
+									img(src="http://s.baixing.net/img/bangui/classify.png")
+									p.tittlew
+										| 分类
+									p.descw
+										| 请将信息发布到指定的类目，当您不知道如何分类的时候可以选择向我们寻求帮助
+			div.base-bottom
+				div.base-bottom-img-area
+					img(src="http://s.baixing.net/img/bangui/pic3.png")
+				div.base-bottom-text1
+					p.
+						如果你发布的信息没有遵守上述规则,将不会通过审核或者将被删除
+				div.base-bottom-text2
+					p.
+						百姓网需要大家一起来维护这个安全 可靠 有趣的社区，如果你发现有信息违反上述规则或者发现你不想看到的信息，希望你能通过举报的方式告诉我们，我们需要大家的帮助。
+
+
+		div#detail.bangui-tab
+			.outer-container
+				div
+					p 为了更好地让他找到你
+					p 我们希望您<span>不要</span>做：
+				//#detail-button
+			.outer-container
+				.inner-container
+					.icon
+					.cell
+						.cell-head
+							h2 城市发布超限
+						p 百姓网是本地的，如果您的信息需要出现在多个城市，需要付费才能发布。
+					.cell
+						.cell-head
+							h2 类目发布超限
+						p 百姓网对每个人是公平的，为了避免一个人占用太多版面，超过类目发布限制时需要付费才能发布。
+					.cell
+						.cell-head
+							h2 群租房信息
+						p 百姓网不允许发布违反《上海市居住房屋租赁管理办法》的信息，出租屋人均面积小于5平，或单间租用给超过2人的房源信息会被删除。
+					.cell
+						.cell-head
+							h2 号码冒用信息
+						p 百姓网不允许发布含有他人联系方式的信息，信息经联系方式持有者确认为冒用时会被删除，且账户会被永久冻结。
+				.inner-container
+					.icon
+					.cell
+						.cell-head
+							h2 商家发布个人
+						p 商家发布个人信息是有违诚信原则的，请如实选择发布人身份；一旦发现您以“商家”冒充“个人”发帖，那么您在该类目下发布的所有信息将会被标记为商家信息。
+					.cell
+						.cell-head
+							h2 重复信息
+						p 百姓网上的信息是新鲜的，标题、描述或包含的图片任一相同时信息会被删除，请为信息定制不同的标题、描述和图片。
+					.cell
+						.cell-head
+							h2 错类信息
+						p 百姓网上的信息是分类的，错类信息会被删除，请将信息发布到单个最相关的类目。
+					.cell
+						.cell-head
+							h2 违法信息
+						p 百姓网不允许发布违反国家法律法规的信息，信息涉及违反《刑法》规定的内容时会被删除，且账户会被冻结365天。
+				.inner-container
+					.icon
+					.cell
+						.cell-head
+							h2 违禁信息
+						p 百姓网不允许发布违反国家法律法规的信息，信息涉及违反《互联网违禁信息》规定的内容时会被删除。
+					.cell
+						.cell-head
+							h2 低俗信息
+						p 百姓网不允许发布违反国家法律法规的信息，信息涉及违反《整治互联网低俗之风专项行动》规定的内容时会被删除。
+					.cell
+						.cell-head
+							h2 欺诈信息
+						p 欺诈信息是有违诚信原则的，请如实描述信息；一旦发现故意捏造事实，意图从对方的损失中获益的行为，信息会被删除且账户会被冻结365天。
+					.cell
+						.cell-head
+							h2 故意躲避<br>审查规则
+						p 百姓网是公平的，一旦发现躲避审查、多发霸屏和利用多账户进行霸屏的行为、利用第三方发贴机的行为发布的信息将被删除，严重扰乱账户将被冻结。
+				.inner-container
+					.icon
+					.cell
+						.cell-head
+							h2 代发删除
+						p 百姓网禁止未经他人允许的情况下发布其包含用户联系方式的信息
+					.cell
+						.cell-head
+							h2 举报删除
+						p 百姓网是自由公平的,每个人都有权利举报你认为不好的信息,多人举报的信息将被删除。
+					.cell
+						.cell-head
+							h2 待审核信息
+						p 百姓网针对可能危害网站安全风险的信息需要人工审核后显示在网站上。
+					.cell
+						.cell-head
+							h2 联盟违规信息
+						p 百姓网信息联盟不允许发布违反《信息联盟》规定的信息，《信息联盟违规类型》。
+				.inner-container
+					.icon
+					.cell
+						.cell-head
+							h2 图片违规信息
+						p 图片是信息浏览者对信息内容作出判断的直接渠道和重要依据，百姓网鼓励用户上传真实、清晰、多角度的图片。图片涉及违反《不良图片违规类型》规定的内容时信息会被删除。
+
+
+		#rule.tab-content-pane.bangui-tab.clearfix
+			div
+				nav
+					div
+						each  c in data->category
+							if(c->name != '')
+								a(href='##{c->id}')
+									span #{c->name}
+				div.rule-lists(style='display: none')
+					div.rule-lists-frame
+						each value, key in data->rules
+							- $name = $data->category[$key]->name;
+							div.rule-list.clearfix(id='#{key}-list', style='display: none')
+								div.clear-left-bar
+									- var i=0;
+									each item in value
+										div
+											a(data-index='#{key}--#{i}') #{item['name']}
+										- i++
+			div.rule-content
+				each value, key in data->rules
+					- $name = $data->category[$key]->name;
+					div.rule-detail(id='#{key}')
+						div.detail-box
+							div.detail-tittle
+								img(src='http://s.baixing.net/img/bangui/#{key}.png')
+								p.
+									#{name}
+							div.detail-desc
+								each item in value
+									h3 #{item['name']}
+									!{$item['rules']}
+	script.
+		_defer.push(function () {
+			var ruleState = 'static';
+			var jumpButtonItems = $('#jumpbutton ul li a');
+			//三个页面之间切换和hash控制
+			$('.bangui-tab').hide();
+			switch (location.hash) {
+				case '#second' :
+					$('#detail').show();
+					jumpButtonItems.css({color: 'inherit'});
+					$('#jumpbutton ul li:nth-child(2) a').addClass('active');
+					$('header .baixingwang-logo:last-child').hide();
+					$('header .baixingwang-logo:first-child').show();
+					break;
+				case '#third' :
+					$('#rule').show();
+					jumpButtonItems.css({color: 'inherit'});
+					$('#jumpbutton ul li:nth-child(3) a').addClass('active');
+					$('header .baixingwang-logo:last-child').hide();
+					$('header .baixingwang-logo:first-child').show();
+					break;
+				default :
+					$('#principle').show();
+					location.hash = '#first';
+					jumpButtonItems.css({color: 'white'});
+					$('#jumpbutton ul li:nth-child(1) a').addClass('active');
+					$('header .baixingwang-logo:first-child').hide();
+					$('header .baixingwang-logo:last-child').show();
+			}
+			$('#jumpbutton').click(function (e) {
+				if (e.preventDefault) {
+					e.preventDefault();
+				}
+				if(e.target.getAttribute('href')) {
+					var targetHash = e.target.getAttribute('href');
+					targetHash = targetHash.slice(targetHash.indexOf('#'));
+					$('.bangui-tab').hide();
+					$(targetHash).show();
+					var newHash = '';
+					switch (targetHash) {
+						case '#principle' :
+							newHash = '#first';
+							jumpButtonItems.css({color: 'white'});
+							jumpButtonItems.removeClass('active');
+							$('#jumpbutton ul li:nth-child(1) a').addClass('active');
+							$('header .baixingwang-logo:first-child').hide();
+							$('header .baixingwang-logo:last-child').show();
+							break;
+						case '#detail' :
+							newHash = '#second';
+							jumpButtonItems.css({color: 'inherit'});
+							jumpButtonItems.removeClass('active');
+							$('#jumpbutton ul li:nth-child(2) a').addClass('active');
+							$('header .baixingwang-logo:last-child').hide();
+							$('header .baixingwang-logo:first-child').show();
+							break;
+						case '#rule' :
+							newHash = '#third';
+							jumpButtonItems.css({color: 'inherit'});
+							jumpButtonItems.removeClass('active');
+							$('#jumpbutton ul li:nth-child(3) a').addClass('active');
+							$('header .baixingwang-logo:last-child').hide();
+							$('header .baixingwang-logo:first-child').show();
+							break;
+						default :
+							newHash = '#';
+					}
+					location.hash = newHash;
+				}
+				return false;
+			});
+
+			//缓存的变量，以便后面使用
+			var wholePage = $("html,body");
+			var ruleDetail = $('#rule .rule-content .rule-detail');
+			var ruleNavBar = $('#rule > div:first-child');
+			var ruleNav = $('#rule nav');
+			var ruleContent = $('#rule .rule-content');
+			var ruleList = $('#rule .rule-list');
+			var ruleLists = $('#rule .rule-lists')
+			ruleNav.css({'margin': '125px 0 0'});
+			ruleNavBar.css({'position': 'static'});
+			ruleContent.css({'top': '0'});
+			//智能判别用户是否希望离开，以及快速回到最顶端（在页面中加个提示？）
+			ruleNavBar.mouseleave(function (e) {
+				if (ruleNavBar.offset().top > e.pageY) {
+					wholePage.stop();
+					wholePage.animate({scrollTop: 0}, 400);
+				}
+				ruleList.hide();
+				ruleLists.hide();
+			});
+			//滚动到具体条目
+			ruleLists.click(function (e) {
+				var index = e.target.getAttribute('data-index');
+				var key = index.slice(0, index.indexOf('--'));
+				var ruleNum = parseInt(index.slice(index.indexOf('--') + 2));
+				var screenVisibleTop = ruleLists.outerHeight(true);
+				alert(screenVisibleTop);
+				if(ruleState == 'static') {
+					wholePage.animate({scrollTop: $('#' + key + ' .detail-desc h3:nth-of-type(' + (ruleNum+1) + ')').offset().top-screenVisibleTop*2-76},
+							500);
+				}
+				else {
+					wholePage.animate({scrollTop: $('#' + key + ' .detail-desc h3:nth-of-type(' + (ruleNum+1) + ')').offset().top-screenVisibleTop-76},
+							500);
+				}
+
+			});
+
+			//nav导航栏中类目自动滚动及列表显示
+			ruleNav.find('span').click(function (e) {
+				var href = e.target.parentNode.href;
+				var hash = href.slice(href.indexOf('#'));
+				var key = hash.slice(1);
+				wholePage.stop();
+				wholePage.animate({scrollTop: $(hash).offset().top}, 1000);
+				return false;
+			});
+			ruleNav.find('span').hover(function (e) {
+				var href = e.target.parentNode.href;
+				var hash = href.slice(href.indexOf('#'));
+				var key = hash.slice(1);
+				ruleLists.show();
+				ruleList.hide();
+				$('#' + key + '-list').show();
+			});
+			//监视页面位置，调整状态
+			$(window).scroll(updatePosition);
+			function updatePosition() {
+				var top = $(window).scrollTop();
+				ruleDetail.each(function (index) {
+					if ($(this).offset().top < top + 240)	//简单的判断，会有少量资源浪费
+					{
+						ruleNav.find('a').removeClass('rule-nav-a-hover');
+						ruleNav.find('a:nth-child(' + (index + 1) + ')').addClass('rule-nav-a-hover');
+					}
+				});
+				if (top > 181) {
+					ruleNav.css({'margin': 0});
+					ruleContent.css({'top': '188px'});
+					if (ruleState == 'static') {
+						ruleNavBar.css({'top': '0', 'position': 'fixed', 'z-index': 999});
+						ruleState = 'fixed';
+					}
+				} else {
+					if(ruleState == 'fixed') {
+						ruleNav.css({'margin': '125px 0 0'});
+						ruleNavBar.css({'position': 'static'});
+						ruleContent.css({'top': '0'});
+						ruleState = 'static';
+					}
+				}
+			}
+		});
